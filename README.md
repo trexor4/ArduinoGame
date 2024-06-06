@@ -6,10 +6,12 @@ This game using buttons will make you able to switch between the levels and help
 
 Accelerometer sensor
 Sound sensor
+
 //Outputs:
 
 LEDs
 Sound box
+
 //Map functions:
 
 Mapping sound level to LED light #
