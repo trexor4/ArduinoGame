@@ -8,8 +8,7 @@
 // Define game states
 #define LEVEL1 1
 #define LEVEL2 2
-#define LEVEL3 3
-#define FINAL 4
+#define FINAL 3
 
 int currentLevel = LEVEL1;
 int score = 0;
@@ -38,8 +37,8 @@ void sparkle(int speed, int len);
 void playTone(float vroom);
 void displayDiceRoll(int rollNumber);
 void displayShakeStrength(int strength);
-void displaySoundLevel(int level);
 void winGame();
+void displayScore();
 
 void setup() {
   Serial.begin(9600);
@@ -79,24 +78,22 @@ void loop() {
   switch (currentLevel) {
     case LEVEL1:
       if (totalAccel > ROLL_THRESHOLD) {
-        int rollNumber = random(1, 11);
+        int rollNumber = random(1, 7); // Roll a number from 1 to 6
         displayDiceRoll(rollNumber);
-        score++;
+        if (rollNumber == 6) {
+          score++;
+          displayScore();
+        }
       }
       break;
     case LEVEL2:
       if (totalAccel > SHAKE_THRESHOLD) {
         int shakeStrength = map(totalAccel, SHAKE_THRESHOLD, 100, 1, 10);
         displayShakeStrength(shakeStrength);
-        score++;
-      }
-      break;
-    case LEVEL3:
-      int soundLevel = map(CircuitPlayground.soundSensor(), 0, 1023, 1, 10);
-      displaySoundLevel(soundLevel);
-      if (soundLevel == 10) {
-        CircuitPlayground.playTone(1000, 100);
-        score++;
+        if (shakeStrength >= 7) {
+          score++;
+          displayScore();
+        }
       }
       break;
   }
@@ -116,7 +113,7 @@ void rightButtonISR() {
   delay(20);
   if (currentLevel < FINAL) {
     currentLevel++;
-  } else if (currentLevel == FINAL) {
+  } else if (currentLevel == FINAL && score == 2) {
     gameWon = true;
   }
   Serial.println("Right button pressed");
@@ -156,12 +153,14 @@ void displayShakeStrength(int strength) {
   CircuitPlayground.clearPixels();
 }
 
-void displaySoundLevel(int level) {
+void displayScore() {
+  Serial.print("Score: ");
+  Serial.println(score);
   CircuitPlayground.clearPixels();
-  for (int i = 0; i < level; i++) {
-    CircuitPlayground.setPixelColor(i, 0x0000FF);
+  for (int i = 0; i < score && i < 10; i++) {
+    CircuitPlayground.setPixelColor(i, 0xFFFF00);  // Yellow color for score display
   }
-  delay(500);
+  delay(1000);
   CircuitPlayground.clearPixels();
 }
 
@@ -171,3 +170,4 @@ void winGame() {
   CircuitPlayground.playTone(2000, 1000);
   while (true); // Stop the game
 }
+
